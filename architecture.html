@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Architecture — GreenEdge Architects &amp; Designers</title>
+<meta name="description" content="Architecture services from GreenEdge: context-driven spaces designed around people, purpose and everyday life, based in Chhatrapati Sambhajinagar.">
+<style>
+/* ============================================================
+   GreenEdge Architects & Designers — shared styles
+   ============================================================ */
+
+:root{
+  --bg: #0c1210;
+  --panel: #121a17;
+  --line: rgba(233, 231, 221, 0.12);
+  --line-strong: rgba(233, 231, 221, 0.28);
+  --ink: #e9e7dd;
+  --ink-dim: #a8afa2;
+  --ink-dim2: #9aa39a;
+  --green: #7c9b7e;
+  --green-soft: #4c5f4d;
+  --green-glow: rgba(124, 155, 126, 0.18);
+  --radius: 2px;
+  --maxw: 1180px;
+  --ease: cubic-bezier(.65,0,.35,1);
+  --ease-soft: cubic-bezier(.22,.61,.36,1);
+}
+
+*{ box-sizing:border-box; }
+
+html{ background:var(--bg); }
+
+@media (prefers-reduced-motion: reduce){
+  *{ animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important; scroll-behavior:auto !important; }
+}
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", "Helvetica Neue", Arial, sans-serif;
+  font-size:16px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  overflow-x:hidden;
+}
+
+h1,h2,h3,h4{
+  font-family: Georgia, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+  font-weight:400;
+  margin:0;
+  color:var(--ink);
+  letter-spacing:-0.01em;
+}
+
+a{ color:inherit; }
+img{ max-width:100%; display:block; }
+p{ margin:0; }
+ul{ margin:0; padding:0; }
+
+::selection{ background: var(--green-glow); color: var(--ink); }
+
+:focus-visible{
+  outline: 1.5px solid var(--green);
+  outline-offset: 3px;
+}
+
+/* buttery scrollbar */
+::-webkit-scrollbar{ width:10px; height:10px; }
+::-webkit-scrollbar-track{ background:var(--bg); }
+::-webkit-scrollbar-thumb{ background:var(--green-soft); border-radius:6px; border:2px solid var(--bg); }
+html{ scrollbar-color: var(--green-soft) var(--bg); scrollbar-width:thin; }
+
+/* ---------- background canvas ---------- */
+#stars{
+  position:fixed; inset:0; width:100%; height:100%;
+  z-index:0; pointer-events:none; opacity:0.55;
+}
+.grain{
+  position:fixed; inset:0; z-index:1; pointer-events:none;
+  background-image: radial-gradient(circle at 18% 24%, var(--green-glow), transparent 46%);
+  opacity:0.32;
+}
+
+/* ---------- cursor glow (desktop only, additive, never replaces OS cursor) ---------- */
+#cursorGlow{
+  position:fixed;
+  top:0; left:0;
+  width:340px; height:340px;
+  margin-left:-170px; margin-top:-170px;
+  border-radius:50%;
+  background: radial-gradient(circle, var(--green-glow), transparent 70%);
+  pointer-events:none;
+  z-index:2;
+  opacity:0;
+  transition: opacity 0.5s var(--ease-soft);
+  will-change: transform;
+}
+#cursorGlow.active{ opacity:1; }
+
+/* ---------- page transition curtain ---------- */
+#curtain{
+  position:fixed; inset:0;
+  z-index:200;
+  background:var(--bg);
+  transform: scaleY(1);
+  transform-origin: bottom;
+  pointer-events:none;
+}
+#curtain.uncover{
+  animation: curtainUncover 0.85s var(--ease) forwards;
+}
+#curtain.cover{
+  transform-origin: top;
+  animation: curtainCover 0.5s var(--ease) forwards;
+}
+@keyframes curtainUncover{
+  from{ transform:scaleY(1); transform-origin:bottom; }
+  to{ transform:scaleY(0); transform-origin:bottom; }
+}
+@keyframes curtainCover{
+  from{ transform:scaleY(0); transform-origin:top; }
+  to{ transform:scaleY(1); transform-origin:top; }
+}
+
+/* ---------- layout helpers ---------- */
+.wrap{ max-width:var(--maxw); margin:0 auto; padding:0 28px; }
+section{ position:relative; z-index:2; }
+main{ position:relative; z-index:2; }
+
+.eyebrow{
+  text-transform:uppercase;
+  letter-spacing:0.14em;
+  font-size:0.72rem;
+  color:var(--ink-dim2);
+  font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.section-head{ margin-bottom:52px; max-width:56ch; }
+.section-head h2{ font-size:clamp(1.8rem, 3.4vw, 2.6rem); margin-top:14px; }
+
+section.pad{ padding:110px 0; }
+@media (max-width:560px){ section.pad{ padding:76px 0; } }
+
+/* ---------- navbar ---------- */
+header{
+  position:fixed; top:0; left:0; right:0; z-index:50;
+  padding:22px 0;
+  transition: padding 0.5s var(--ease), background 0.5s var(--ease), border-color 0.5s var(--ease);
+  border-bottom:1px solid transparent;
+}
+header.scrolled{
+  padding:14px 0;
+  background:rgba(12,18,16,0.72);
+  backdrop-filter: blur(14px) saturate(120%);
+  -webkit-backdrop-filter: blur(14px) saturate(120%);
+  border-bottom:1px solid var(--line);
+}
+.navrow{ max-width:var(--maxw); margin:0 auto; padding:0 28px; display:flex; align-items:center; justify-content:space-between; }
+.brand{ font-family:Georgia, serif; font-size:1.05rem; letter-spacing:0.06em; text-decoration:none; color:var(--ink); }
+
+nav.primary-nav{ display:flex; gap:36px; align-items:center; }
+nav.primary-nav a{
+  text-decoration:none; font-size:0.92rem; color:var(--ink-dim2);
+  position:relative; padding:4px 0;
+  transition:color 0.4s var(--ease);
+}
+nav.primary-nav a:hover, nav.primary-nav a[aria-current="page"]{ color:var(--ink); }
+nav.primary-nav a::after{
+  content:""; position:absolute; left:0; bottom:0; width:0%; height:1px;
+  background:var(--green); transition:width 0.45s var(--ease);
+}
+nav.primary-nav a:hover::after, nav.primary-nav a[aria-current="page"]::after{ width:100%; }
+
+.menu-btn{
+  display:none; background:none; border:1px solid var(--line-strong); color:var(--ink);
+  width:42px; height:42px; border-radius:var(--radius); cursor:pointer;
+  align-items:center; justify-content:center; position:relative;
+  transition:border-color 0.4s var(--ease);
+}
+.menu-btn:hover{ border-color:var(--green); }
+.menu-btn span, .menu-btn span::before, .menu-btn span::after{
+  content:""; display:block; width:16px; height:1px; background:var(--ink); position:relative;
+  transition: transform 0.4s var(--ease), opacity 0.4s var(--ease);
+}
+.menu-btn span::before{ position:absolute; top:-5px; left:0; }
+.menu-btn span::after{ position:absolute; top:5px; left:0; }
+.menu-btn[aria-expanded="true"] span{ background:transparent; }
+.menu-btn[aria-expanded="true"] span::before{ transform:translateY(5px) rotate(45deg); }
+.menu-btn[aria-expanded="true"] span::after{ transform:translateY(-5px) rotate(-45deg); }
+
+.mobile-nav{
+  position:fixed; inset:0; z-index:45;
+  background:rgba(10,14,13,0.98);
+  display:flex; flex-direction:column; align-items:flex-start; justify-content:center;
+  gap:24px; padding:0 40px;
+  clip-path: inset(0 0 100% 0);
+  transition: clip-path 0.6s var(--ease);
+  pointer-events:none;
+}
+.mobile-nav.open{ clip-path: inset(0 0 0% 0); pointer-events:auto; }
+.mobile-nav a{
+  text-decoration:none; color:var(--ink); font-family:Georgia, serif; font-size:1.7rem;
+  opacity:0.7; transition:opacity 0.35s var(--ease), transform 0.35s var(--ease);
+}
+.mobile-nav a:hover{ opacity:1; transform:translateX(6px); }
+.mobile-nav .m-eyebrow{ margin-bottom:-6px; }
+
+/* ---------- buttons / links ---------- */
+.cta{
+  display:inline-flex; align-items:center; gap:10px;
+  background:transparent; color:var(--ink); border:1px solid var(--line-strong);
+  padding:14px 24px; text-decoration:none; font-size:0.95rem; border-radius:var(--radius);
+  transition: border-color 0.45s var(--ease), background 0.45s var(--ease), transform 0.45s var(--ease);
+  will-change: transform;
+}
+.cta:hover{ border-color:var(--green); background:var(--green-glow); }
+.cta span.arrow{ transition:transform 0.45s var(--ease); }
+.cta:hover span.arrow{ transform:translate(2px,-2px); }
+.cta.ghost{ border-color:var(--line); }
+
+.text-link{
+  display:inline-flex; align-items:center; gap:8px; text-decoration:none; color:var(--ink-dim2);
+  font-size:0.9rem; position:relative; transition:color 0.4s var(--ease);
+}
+.text-link:hover{ color:var(--green); }
+.text-link .arrow{ transition:transform 0.4s var(--ease); }
+.text-link:hover .arrow{ transform:translateX(3px); }
+
+/* ---------- breadcrumb ---------- */
+.crumbs{
+  display:flex; gap:8px; align-items:center;
+  font-size:0.82rem; color:var(--ink-dim2); margin-bottom:20px;
+}
+.crumbs a{ text-decoration:none; color:var(--ink-dim2); transition:color 0.4s var(--ease); }
+.crumbs a:hover{ color:var(--green); }
+.crumbs span.sep{ opacity:0.5; }
+.crumbs span.current{ color:var(--ink); }
+
+/* ---------- hero panel (home) ---------- */
+.hero{ min-height:100vh; display:flex; align-items:center; padding:150px 0 90px; }
+.hero-grid{ display:grid; grid-template-columns:1.35fr 0.9fr; gap:64px; align-items:end; }
+.hero h1{ font-size:clamp(2.4rem, 5.4vw, 4.4rem); line-height:1.06; margin:18px 0 26px; max-width:14ch; }
+.hero-sub{ color:var(--ink-dim2); max-width:46ch; font-size:1.02rem; margin-bottom:34px; }
+
+.hero-panel{
+  border:1px solid var(--line); padding:30px; border-radius:var(--radius);
+  background:linear-gradient(180deg, rgba(233,231,221,0.03), rgba(233,231,221,0));
+  transition: border-color 0.5s var(--ease);
+}
+.hero-panel:hover{ border-color:var(--line-strong); }
+.hero-panel .tag{ font-size:0.78rem; letter-spacing:0.1em; color:var(--green); margin-bottom:20px; display:block; }
+.hero-panel ul{ list-style:none; margin:0 0 24px; border-top:1px solid var(--line); }
+.hero-panel li{ padding:12px 0; border-bottom:1px solid var(--line); font-family:Georgia, serif; font-size:1.15rem; }
+.hero-panel .loc{ color:var(--ink-dim2); font-size:0.88rem; line-height:1.6; }
+
+/* ---------- services grid ---------- */
+.services-grid{ display:grid; grid-template-columns:repeat(3, 1fr); gap:1px; background:var(--line); border:1px solid var(--line); }
+.service-card{
+  background:var(--bg); padding:44px 34px; position:relative; overflow:hidden;
+  text-decoration:none; display:block; color:var(--ink);
+  transition: background 0.5s var(--ease);
+}
+.service-card::before{
+  content:""; position:absolute; inset:0;
+  background: radial-gradient(320px circle at var(--mx,50%) var(--my,50%), var(--green-glow), transparent 60%);
+  opacity:0; transition:opacity 0.5s var(--ease); pointer-events:none;
+}
+.service-card:hover::before{ opacity:1; }
+.service-card:hover{ background:#0f1613; }
+.service-num{ font-family:Georgia, serif; font-size:0.85rem; color:var(--ink-dim2); display:block; margin-bottom:28px; }
+.service-icon{ width:38px; height:38px; margin-bottom:22px; position:relative; }
+.service-icon svg{ width:100%; height:100%; display:block; }
+.service-card h3{ font-size:1.3rem; margin-bottom:12px; }
+.service-card p{ color:var(--ink-dim2); font-size:0.95rem; max-width:32ch; margin:0; }
+.service-card .text-link{ margin-top:20px; }
+.service-line{ position:absolute; left:0; bottom:0; height:2px; width:0%; background:var(--green); transition:width 0.6s var(--ease); }
+.service-card:hover .service-line{ width:100%; }
+
+@media (max-width:980px){ .services-grid{ grid-template-columns:1fr; } }
+
+/* ---------- studio / info grid ---------- */
+.studio-grid{ display:grid; grid-template-columns:1.1fr 0.9fr; gap:70px; align-items:start; }
+.studio-copy p{ color:var(--ink-dim2); font-size:1.02rem; max-width:54ch; margin:0 0 18px; }
+.studio-copy ul{ margin:26px 0 0; list-style:none; display:flex; flex-wrap:wrap; gap:10px 14px; }
+.studio-copy li{ font-size:0.85rem; color:var(--ink-dim2); border:1px solid var(--line); padding:7px 14px; border-radius:var(--radius); }
+
+.info-grid{ border-top:1px solid var(--line); }
+.info-row{ display:grid; grid-template-columns:1fr 1.4fr; gap:18px; padding:22px 0; border-bottom:1px solid var(--line); }
+.info-row .label{ font-size:0.72rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-dim2); padding-top:2px; }
+.info-row .value{ font-family:Georgia, serif; font-size:1.05rem; }
+
+@media (max-width:980px){ .studio-grid{ grid-template-columns:1fr; gap:40px; } }
+@media (max-width:560px){ .info-row{ grid-template-columns:1fr; gap:6px; } }
+
+/* ---------- philosophy / plan visual ---------- */
+.philosophy{ position:relative; border:1px solid var(--line); padding:70px 40px; overflow:hidden; border-radius:var(--radius); transition:border-color 0.5s var(--ease); }
+.philosophy:hover{ border-color:var(--line-strong); }
+.plan-lines{ position:absolute; inset:0; z-index:0; opacity:0.5; }
+.plan-lines svg{ width:100%; height:100%; display:block; transition: transform 0.4s var(--ease-soft); }
+.philosophy-content{ position:relative; z-index:2; max-width:640px; }
+.philosophy h2{ font-size:clamp(1.7rem, 3vw, 2.3rem); margin-bottom:20px; }
+.philosophy p{ color:var(--ink-dim2); font-size:1rem; max-width:50ch; }
+.philosophy-words{ margin-top:34px; display:flex; flex-wrap:wrap; gap:0 28px; font-family:Georgia,serif; font-size:0.95rem; color:var(--green); }
+@media (max-width:560px){ .philosophy{ padding:44px 22px; } }
+
+/* ---------- accordion (interactive, buttery height animation) ---------- */
+.accordion{ border-top:1px solid var(--line); }
+.accordion-item{ border-bottom:1px solid var(--line); }
+.accordion-trigger{
+  width:100%; display:flex; align-items:center; justify-content:space-between; gap:20px;
+  background:none; border:none; text-align:left; cursor:pointer; color:var(--ink);
+  padding:24px 0; font-family:Georgia, serif; font-size:1.1rem;
+}
+.accordion-trigger .idx{ font-family:-apple-system,sans-serif; font-size:0.78rem; color:var(--ink-dim2); margin-right:14px; }
+.accordion-trigger .plus{
+  position:relative; width:16px; height:16px; flex:none;
+  transition: transform 0.5s var(--ease);
+}
+.accordion-trigger .plus::before, .accordion-trigger .plus::after{
+  content:""; position:absolute; background:var(--ink-dim2); transition:background 0.4s var(--ease);
+}
+.accordion-trigger .plus::before{ left:0; top:50%; width:16px; height:1px; transform:translateY(-50%); }
+.accordion-trigger .plus::after{ top:0; left:50%; width:1px; height:16px; transform:translateX(-50%); }
+.accordion-item.open .accordion-trigger .plus{ transform:rotate(135deg); }
+.accordion-item.open .accordion-trigger .plus::before,
+.accordion-item.open .accordion-trigger .plus::after{ background:var(--green); }
+.accordion-item:hover .accordion-trigger{ color:var(--green); }
+
+.accordion-panel{
+  display:grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.55s var(--ease);
+}
+.accordion-item.open .accordion-panel{ grid-template-rows: 1fr; }
+.accordion-panel-inner{ overflow:hidden; }
+.accordion-panel p{ color:var(--ink-dim2); font-size:0.95rem; max-width:60ch; padding-bottom:26px; }
+
+/* ---------- detail page hero ---------- */
+.detail-hero{ padding:150px 0 70px; }
+.detail-hero .num{ font-family:Georgia, serif; font-size:0.9rem; color:var(--green); margin-bottom:18px; display:block; }
+.detail-hero h1{ font-size:clamp(2.2rem, 4.6vw, 3.6rem); max-width:16ch; margin-bottom:24px; }
+.detail-hero p{ color:var(--ink-dim2); font-size:1.05rem; max-width:52ch; }
+
+.detail-grid{ display:grid; grid-template-columns:1.15fr 0.85fr; gap:70px; align-items:start; }
+.detail-copy p{ color:var(--ink-dim2); font-size:1rem; max-width:56ch; margin-bottom:18px; }
+.detail-copy h3{ font-size:1.2rem; margin:8px 0 16px; }
+
+.consider-list{ list-style:none; display:flex; flex-direction:column; gap:0; border-top:1px solid var(--line); }
+.consider-list li{
+  display:flex; align-items:baseline; gap:16px; padding:16px 0; border-bottom:1px solid var(--line);
+  font-size:0.95rem; color:var(--ink-dim2);
+}
+.consider-list li::before{ content:""; width:5px; height:5px; border-radius:50%; background:var(--green); flex:none; }
+
+@media (max-width:980px){ .detail-grid{ grid-template-columns:1fr; gap:40px; } }
+
+.detail-nav-footer{
+  display:flex; justify-content:space-between; align-items:center; gap:20px; flex-wrap:wrap;
+  border-top:1px solid var(--line); padding-top:40px; margin-top:20px;
+}
+
+/* ---------- contact ---------- */
+.contact-hero{ padding:150px 0 30px; }
+.contact-grid{ display:grid; grid-template-columns:1.2fr 1fr; gap:70px; align-items:start; }
+.contact h1{ font-size:clamp(2.1rem, 4.4vw, 3.2rem); max-width:12ch; margin-bottom:20px; }
+.contact-lead{ color:var(--ink-dim2); max-width:44ch; font-size:1rem; }
+.contact-list{ border-top:1px solid var(--line); }
+.contact-item{
+  display:flex; align-items:center; justify-content:space-between; gap:16px;
+  padding:24px 0; border-bottom:1px solid var(--line); text-decoration:none; color:var(--ink);
+  transition:padding-left 0.45s var(--ease), color 0.45s var(--ease);
+}
+.contact-item:hover{ padding-left:10px; color:var(--green); }
+.contact-item .label{ display:block; font-size:0.72rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-dim2); margin-bottom:8px; }
+.contact-item .value{ font-family:Georgia, serif; font-size:1.2rem; }
+.contact-item .copy-hint{
+  font-size:0.75rem; color:var(--ink-dim2); opacity:0; transition:opacity 0.35s var(--ease);
+  white-space:nowrap; flex:none;
+}
+.contact-item:hover .copy-hint{ opacity:1; }
+address{ font-style:normal; }
+@media (max-width:980px){ .contact-grid{ grid-template-columns:1fr; gap:44px; } }
+
+/* ---------- footer ---------- */
+footer{ padding:36px 0 44px; border-top:1px solid var(--line); }
+.footer-row{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; font-size:0.82rem; color:var(--ink-dim2); }
+.footer-links{ display:flex; gap:22px; }
+.footer-links a{ text-decoration:none; color:var(--ink-dim2); transition:color 0.4s var(--ease); }
+.footer-links a:hover{ color:var(--green); }
+
+/* ---------- generic responsive type scaling ---------- */
+h2.scaled{ font-size:clamp(1.8rem, 3.4vw, 2.6rem); }
+
+</style>
+</head>
+<body>
+
+<div id="curtain"></div>
+<canvas id="stars" aria-hidden="true"></canvas>
+<div class="grain" aria-hidden="true"></div>
+<div id="cursorGlow" aria-hidden="true"></div>
+
+<header id="siteHeader">
+  <div class="navrow">
+    <a href="index.html" class="brand">GREENEDGE</a>
+    <nav class="primary-nav" aria-label="Primary">
+      <a href="studio.html">Studio</a>
+      <a href="services.html" aria-current="page">Services</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+    <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="mobileNav">
+      <span></span>
+    </button>
+  </div>
+</header>
+
+<div class="mobile-nav" id="mobileNav">
+  <a href="studio.html">Studio</a>
+  <a href="services.html">Services</a>
+  <a href="contact.html">Contact</a>
+</div>
+
+<main>
+
+  <section class="detail-hero">
+    <div class="wrap">
+      <div class="crumbs">
+        <a href="services.html">Services</a>
+        <span class="sep">/</span>
+        <span class="current">Architecture</span>
+      </div>
+      <span class="num">01 — Architecture</span>
+      <h1>Context-driven spaces, designed around real life.</h1>
+      <p>Architecture at GreenEdge starts with the site and the people who will use it — its climate, orientation and constraints, and the everyday rhythms of the lives that will fill it.</p>
+    </div>
+  </section>
+
+  <section class="pad" style="padding-top:20px;">
+    <div class="wrap">
+      <div class="detail-grid">
+        <div class="detail-copy">
+          <h3>How we think about a building</h3>
+          <p>A building is shaped as much by what surrounds it as by what's asked of it. Orientation, prevailing light, existing structures and the movement of people around a site all inform the earliest sketches, well before questions of style or finish come up.</p>
+          <p>From there, the plan is developed around how the space will actually be used day to day — where people gather, where they pass through, and where they need quiet. Structure, material and detail are worked out so the building holds together as one coherent idea, not a collection of separate decisions.</p>
+        </div>
+        <div>
+          <span class="eyebrow" style="margin-bottom:14px; display:block;">What shapes the design</span>
+          <ul class="consider-list">
+            <li>Site orientation, climate and existing conditions</li>
+            <li>How the building will be used, day to day</li>
+            <li>Structure, material and construction logic</li>
+            <li>Its relationship to interiors and landscape</li>
+            <li>Light, ventilation and long-term maintenance</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="pad">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Good to know</span>
+        <h2>Frequently asked</h2>
+      </div>
+      <div class="accordion">
+        <div class="accordion-item open">
+          <button class="accordion-trigger" aria-expanded="true">
+            <span><span class="idx">01</span>What stage should I reach out at?</span>
+            <span class="plus" aria-hidden="true"></span>
+          </button>
+          <div class="accordion-panel"><div class="accordion-panel-inner">
+            <p>As early as possible — even before a plot is finalised. Early involvement lets site and orientation inform the design from the start, rather than working around decisions already made.</p>
+          </div></div>
+        </div>
+        <div class="accordion-item">
+          <button class="accordion-trigger" aria-expanded="false">
+            <span><span class="idx">02</span>Do you work on both new builds and renovations?</span>
+            <span class="plus" aria-hidden="true"></span>
+          </button>
+          <div class="accordion-panel"><div class="accordion-panel-inner">
+            <p>Yes — new construction and renovation are approached with the same process: understanding the site and brief first, then developing a design that responds to both.</p>
+          </div></div>
+        </div>
+        <div class="accordion-item">
+          <button class="accordion-trigger" aria-expanded="false">
+            <span><span class="idx">03</span>Can architecture, interiors and landscape be handled together?</span>
+            <span class="plus" aria-hidden="true"></span>
+          </button>
+          <div class="accordion-panel"><div class="accordion-panel-inner">
+            <p>Yes — that's how the studio prefers to work. Having all three under one roof means the building, its interiors and its surroundings are designed as one continuous idea.</p>
+          </div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="pad" style="padding-top:0;">
+    <div class="wrap">
+      <div class="detail-nav-footer">
+        <a href="services.html" class="text-link"><span class="arrow" aria-hidden="true">←</span> All services</a>
+        <a href="interior-design.html" class="text-link">Interior Design <span class="arrow" aria-hidden="true">→</span></a>
+        <a href="contact.html" class="cta">Start a conversation <span class="arrow" aria-hidden="true">↗</span></a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap footer-row">
+    <span>© 2026 GreenEdge Architects &amp; Designers</span>
+    <div class="footer-links">
+      <a href="studio.html">Studio</a>
+      <a href="services.html">Services</a>
+      <a href="contact.html">Contact</a>
+    </div>
+    <span>Chhatrapati Sambhajinagar · Maharashtra</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var isTouch = window.matchMedia && window.matchMedia('(hover: none), (pointer: coarse)').matches;
+
+  /* ---------------- header scroll state ---------------- */
+  var header = document.getElementById('siteHeader');
+  function onScroll(){
+    if(!header) return;
+    if(window.scrollY > 12){ header.classList.add('scrolled'); }
+    else{ header.classList.remove('scrolled'); }
+  }
+  document.addEventListener('scroll', onScroll, { passive:true });
+  onScroll();
+
+  /* ---------------- mobile nav ---------------- */
+  var menuBtn = document.getElementById('menuBtn');
+  var mobileNav = document.getElementById('mobileNav');
+  function closeMenu(){
+    if(!mobileNav) return;
+    mobileNav.classList.remove('open');
+    menuBtn.setAttribute('aria-expanded','false');
+    menuBtn.setAttribute('aria-label','Open menu');
+  }
+  function toggleMenu(){
+    var open = mobileNav.classList.toggle('open');
+    menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    menuBtn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+  }
+  if(menuBtn && mobileNav){
+    menuBtn.addEventListener('click', toggleMenu);
+  }
+
+  /* ---------------- page curtain transitions ---------------- */
+  var curtain = document.getElementById('curtain');
+
+  function revealPage(){
+    if(!curtain) return;
+    if(reduceMotion){ curtain.style.display='none'; return; }
+    requestAnimationFrame(function(){
+      curtain.classList.add('uncover');
+    });
+  }
+  revealPage();
+  window.addEventListener('pageshow', function(e){
+    if(e.persisted && curtain){
+      curtain.classList.remove('cover');
+      curtain.style.transform = 'scaleY(1)';
+      curtain.style.transformOrigin = 'bottom';
+      void curtain.offsetWidth;
+      curtain.classList.add('uncover');
+    }
+  });
+
+  function navigateWithTransition(href){
+    if(!curtain || reduceMotion){ window.location.href = href; return; }
+    curtain.classList.remove('uncover');
+    curtain.style.transform = '';
+    curtain.classList.add('cover');
+    var done = false;
+    function go(){
+      if(done) return;
+      done = true;
+      window.location.href = href;
+    }
+    curtain.addEventListener('animationend', go, { once:true });
+    setTimeout(go, 600);
+  }
+
+  document.querySelectorAll('a[href$=".html"], a[href="index.html"]').forEach(function(a){
+    if(a.target === '_blank' || a.hasAttribute('data-no-transition')) return;
+    a.addEventListener('click', function(e){
+      var href = a.getAttribute('href');
+      if(!href || href.indexOf('http') === 0) return;
+      e.preventDefault();
+      closeMenu();
+      navigateWithTransition(href);
+    });
+  });
+
+  document.querySelectorAll('.mobile-nav a').forEach(function(a){
+    a.addEventListener('click', closeMenu);
+  });
+
+  /* ---------------- cursor glow (desktop only) ---------------- */
+  var glow = document.getElementById('cursorGlow');
+  if(glow && !isTouch && !reduceMotion){
+    var gx = window.innerWidth/2, gy = window.innerHeight/2, cx = gx, cy = gy;
+    window.addEventListener('mousemove', function(e){
+      gx = e.clientX; gy = e.clientY;
+      glow.classList.add('active');
+    });
+    document.addEventListener('mouseleave', function(){ glow.classList.remove('active'); });
+    function tick(){
+      cx += (gx - cx) * 0.09;
+      cy += (gy - cy) * 0.09;
+      glow.style.transform = 'translate(' + cx + 'px,' + cy + 'px)';
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  /* ---------------- magnetic buttons ---------------- */
+  if(!isTouch && !reduceMotion){
+    document.querySelectorAll('.cta, .menu-btn').forEach(function(btn){
+      var strength = 14;
+      btn.addEventListener('mousemove', function(e){
+        var r = btn.getBoundingClientRect();
+        var mx = e.clientX - (r.left + r.width/2);
+        var my = e.clientY - (r.top + r.height/2);
+        btn.style.transform = 'translate(' + (mx/r.width*strength) + 'px,' + (my/r.height*strength) + 'px)';
+      });
+      btn.addEventListener('mouseleave', function(){
+        btn.style.transform = 'translate(0,0)';
+      });
+    });
+  }
+
+  /* ---------------- service card cursor lighting ---------------- */
+  document.querySelectorAll('[data-card]').forEach(function(card){
+    card.addEventListener('mousemove', function(e){
+      var r = card.getBoundingClientRect();
+      card.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+      card.style.setProperty('--my', (e.clientY - r.top) + 'px');
+    });
+  });
+
+  /* ---------------- philosophy plan parallax ---------------- */
+  var planSvg = document.getElementById('planSvg');
+  var philBox = document.getElementById('philosophyBox');
+  if(philBox && planSvg && !reduceMotion && !isTouch){
+    philBox.addEventListener('mousemove', function(e){
+      var r = philBox.getBoundingClientRect();
+      var px = (e.clientX - r.left) / r.width - 0.5;
+      var py = (e.clientY - r.top) / r.height - 0.5;
+      planSvg.style.transform = 'translate(' + (px*10) + 'px,' + (py*10) + 'px)';
+    });
+    philBox.addEventListener('mouseleave', function(){
+      planSvg.style.transform = 'translate(0,0)';
+    });
+  }
+
+  /* ---------------- accordion ---------------- */
+  document.querySelectorAll('.accordion-item').forEach(function(item){
+    var trigger = item.querySelector('.accordion-trigger');
+    if(!trigger) return;
+    trigger.addEventListener('click', function(){
+      var isOpen = item.classList.contains('open');
+      item.parentElement.querySelectorAll('.accordion-item.open').forEach(function(other){
+        if(other !== item){
+          other.classList.remove('open');
+          other.querySelector('.accordion-trigger').setAttribute('aria-expanded','false');
+        }
+      });
+      item.classList.toggle('open', !isOpen);
+      trigger.setAttribute('aria-expanded', (!isOpen).toString());
+    });
+  });
+
+  /* ---------------- copy to clipboard hint on contact items ---------------- */
+  document.querySelectorAll('[data-copy]').forEach(function(el){
+    el.addEventListener('click', function(e){
+      var text = el.getAttribute('data-copy');
+      if(navigator.clipboard && text){
+        navigator.clipboard.writeText(text).catch(function(){});
+      }
+    });
+  });
+
+  /* ---------------- star / particle background ---------------- */
+  var canvas = document.getElementById('stars');
+  if(canvas){
+    var ctx = canvas.getContext('2d');
+    var stars = [];
+    var w, h, dpr;
+    var running = true;
+
+    function resize(){
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      w = window.innerWidth;
+      h = window.innerHeight;
+      canvas.width = w * dpr;
+      canvas.height = h * dpr;
+      canvas.style.width = w + 'px';
+      canvas.style.height = h + 'px';
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+      buildStars();
+    }
+
+    function buildStars(){
+      var area = w * h;
+      var count = Math.round(area / 9000);
+      count = Math.max(40, Math.min(count, 140));
+      stars = [];
+      for(var i=0;i<count;i++){
+        stars.push({
+          x: Math.random()*w,
+          y: Math.random()*h,
+          r: Math.random()*1.1 + 0.3,
+          baseAlpha: Math.random()*0.5 + 0.15,
+          phase: Math.random()*Math.PI*2,
+          speed: Math.random()*0.02 + 0.006,
+          vx: (Math.random()-0.5)*0.045,
+          vy: (Math.random()-0.5)*0.045
+        });
+      }
+    }
+
+    function draw(t){
+      if(!running){ return; }
+      ctx.clearRect(0,0,w,h);
+      for(var i=0;i<stars.length;i++){
+        var s = stars[i];
+        s.x += s.vx;
+        s.y += s.vy;
+        if(s.x < -5) s.x = w+5;
+        if(s.x > w+5) s.x = -5;
+        if(s.y < -5) s.y = h+5;
+        if(s.y > h+5) s.y = -5;
+
+        var tw = Math.sin(t*0.001*s.speed*30 + s.phase);
+        var alpha = s.baseAlpha + tw*0.18;
+        if(alpha < 0.04) alpha = 0.04;
+
+        ctx.beginPath();
+        ctx.fillStyle = 'rgba(233,231,221,' + alpha.toFixed(3) + ')';
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+        ctx.fill();
+      }
+      requestAnimationFrame(draw);
+    }
+
+    window.addEventListener('resize', resize, { passive:true });
+    document.addEventListener('visibilitychange', function(){
+      running = !document.hidden;
+      if(running){ requestAnimationFrame(draw); }
+    });
+
+    resize();
+    if(reduceMotion){
+      draw(0);
+      running = false;
+    } else {
+      requestAnimationFrame(draw);
+    }
+  }
+
+})();
+
+</script>
+</body>
+</html>
